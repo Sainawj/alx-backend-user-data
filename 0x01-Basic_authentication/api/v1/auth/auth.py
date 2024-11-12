@@ -3,61 +3,57 @@
 from typing import List, TypeVar
 from flask import request
 
-# Define a TypeVar named User
-User = TypeVar('User')
-
-
 class Auth:
-    """Template class for API authentication management."""
+    """
+    Auth class to manage API authentication.
+    """
 
     
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """
-        Determines if authentication is required for a given path.
-        
+        Determines if a path requires authentication based on excluded paths.
+
         Args:
             path (str): The path to check.
-            excluded_paths (List[str]): A list of paths that do not require authentication.
+            excluded_paths (List[str]): A list of paths that don't require authentication.
 
         Returns:
             bool: True if authentication is required, False otherwise.
         """
-        if path is None or not excluded_paths:
+        if path is None or excluded_paths is None or len(excluded_paths) == 0:
             return True
 
-        # Ensure path and excluded paths are compared in a slash-tolerant manner
-        if path[-1] != '/':
+        # Ensure the path ends with a slash for comparison
+        if not path.endswith('/'):
             path += '/'
 
-        for excluded_path in excluded_paths:
-            if excluded_path[-1] != '/':
-                excluded_path += '/'
-            if path == excluded_path:
-                return False
-        return True
+        # Check if path is in excluded_paths
+        return path not in excluded_paths
 
     
     def authorization_header(self, request=None) -> str:
         """
-        Retrieves the authorization header from the Flask request object.
-        
+        Retrieves the Authorization header from the request.
+
         Args:
             request (Request): The Flask request object.
 
         Returns:
-            str: None for now, as authorization header retrieval is not yet implemented.
+            str: The Authorization header value, or None if not present.
         """
-        return None
+        if request is None:
+            return None
+        return request.headers.get("Authorization")
 
     
-    def current_user(self, request=None) -> User:
+    def current_user(self, request=None) -> TypeVar('User'):
         """
-        Retrieves the current user based on the request.
-        
+        Placeholder method for retrieving the current user.
+
         Args:
             request (Request): The Flask request object.
 
         Returns:
-            User: None for now, as user retrieval is not yet implemented.
+            TypeVar('User'): None (for now, as this will be implemented later).
         """
         return None
