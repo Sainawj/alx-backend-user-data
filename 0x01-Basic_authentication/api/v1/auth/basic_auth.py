@@ -4,37 +4,32 @@ import base64
 from typing import Type
 from models.user import User  # Assuming User model is imported
 
+
 class BasicAuth(Auth):
     """BasicAuth class inherits from Auth."""
 
-    
+   
     def extract_base64_authorization_header(self, authorization_header: str) -> str:
         """
         Extracts the Base64 part of the Authorization header for Basic Authentication.
         """
-        if authorization_header is None:
+        if authorization_header is None or not isinstance(authorization_header, str):
             return None
-        
-        if not isinstance(authorization_header, str):
-            return None
-        
+
         if not authorization_header.startswith("Basic "):
             return None
-        
+
         # Return the Base64 part after 'Basic ' (i.e., the part after the space)
         return authorization_header.split("Basic ")[1]
 
-   
+    
     def decode_base64_authorization_header(self, base64_authorization_header: str) -> str:
         """
         Decodes the Base64 authorization header.
         """
-        if base64_authorization_header is None:
+        if base64_authorization_header is None or not isinstance(base64_authorization_header, str):
             return None
-        
-        if not isinstance(base64_authorization_header, str):
-            return None
-        
+
         try:
             # Decode the Base64 string and return the result as a UTF-8 string
             decoded_bytes = base64.b64decode(base64_authorization_header)
@@ -47,15 +42,9 @@ class BasicAuth(Auth):
         """
         Extracts the user credentials (email and password) from the decoded Base64 authorization header.
         """
-        if decoded_base64_authorization_header is None:
+        if not isinstance(decoded_base64_authorization_header, str) or ':' not in decoded_base64_authorization_header:
             return None, None
-        
-        if not isinstance(decoded_base64_authorization_header, str):
-            return None, None
-        
-        if ':' not in decoded_base64_authorization_header:
-            return None, None
-        
+
         # Split the string by the colon and return the user email and password
         email, password = decoded_base64_authorization_header.split(":", 1)
         return email, password
@@ -72,29 +61,20 @@ class BasicAuth(Auth):
         Returns:
             User: The corresponding User instance if credentials are valid, otherwise None.
         """
-        if not isinstance(user_email, str) or not isinstance(user_pwd, str):
+        if not isinstance(user_email, str) or not isinstance(user_pwd, str) or user_email is None or user_pwd is None:
             return None
-        
-        if user_email is None or user_pwd is None:
-            return None
-        
-        print(f"Searching for user with email: {user_email}")  # Debugging
-        
+
         # Use the search method of User to find the user based on the email
         users = User.search({"email": user_email})
 
         if not users:
-            print(f"No users found with email: {user_email}")  # Debugging
             return None
-        
+
         # Assume the search method returns a list of users, and we take the first one
         user = users[0]
-        
-        print(f"Found user: {user.display_name()}")  # Debugging
-        
+
         # Check if the password is valid for the found user
         if not user.is_valid_password(user_pwd):
-            print(f"Invalid password for user: {user_email}")  # Debugging
             return None
-        
+
         return user
