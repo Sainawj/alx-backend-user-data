@@ -31,13 +31,16 @@ else:
 def before_request():
     """
     Filters each incoming request to check if authentication is required.
-    If authentication is required, it checks for the authorization header and user.
+    If authentication is required, it checks for the
+    authorization header and user.
     """
     if auth is None:
         return None
 
     # List of routes that do not require authentication
-    excluded_paths = ['/api/v1/status/', '/api/v1/unauthorized/', '/api/v1/forbidden/']
+    excluded_paths = [
+            '/api/v1/status/', '/api/v1/unauthorized/', '/api/v1/forbidden/'
+            ]
 
     # If the path requires authentication
     if auth.require_auth(request.path, excluded_paths):
@@ -72,6 +75,7 @@ def forbidden(error) -> str:
     Returns JSON error response for 403 status code.
     """
     return jsonify({"error": "Forbidden"}), 403
+
 
 if __name__ == "__main__":
     # Get host and port from environment, defaulting to "0.0.0.0" and "5000"
