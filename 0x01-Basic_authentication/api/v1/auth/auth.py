@@ -25,15 +25,22 @@ class Auth:
         if path is None or not excluded_paths:
             return True
 
-        # Ensure path and excluded paths are compared in a slash-tolerant manner
+        # Ensure path ends with a slash for uniform comparison
         if path[-1] != '/':
             path += '/'
 
         for excluded_path in excluded_paths:
-            if excluded_path[-1] != '/':
-                excluded_path += '/'
-            if path == excluded_path:
-                return False
+            # Handle wildcard (*) for prefix matching
+            if excluded_path.endswith('*'):
+                if path.startswith(excluded_path[:-1]):
+                    return False
+            else:
+                # Add trailing slash if missing for exact match comparison
+                if excluded_path[-1] != '/':
+                    excluded_path += '/'
+                if path == excluded_path:
+                    return False
+
         return True
 
     
