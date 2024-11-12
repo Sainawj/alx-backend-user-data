@@ -3,59 +3,59 @@
 from typing import List, TypeVar
 from flask import request
 
-class Auth:
-    """
-    Auth class to manage API authentication.
-    """
+# Define a TypeVar named User
+User = TypeVar('User')
 
-    
+class Auth:
+    """Template class for API authentication management."""
+
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """
-        Determines if a path requires authentication based on excluded paths.
-
+        Determines if authentication is required for a given path.
+        
         Args:
             path (str): The path to check.
-            excluded_paths (List[str]): A list of paths that don't require authentication.
+            excluded_paths (List[str]): A list of paths that do not require authentication.
 
         Returns:
             bool: True if authentication is required, False otherwise.
         """
-        if path is None or excluded_paths is None or len(excluded_paths) == 0:
+        if path is None or not excluded_paths:
             return True
 
-        # Add trailing slashes to paths for consistent comparison
-        if not path.endswith('/'):
+        # Ensure path and excluded paths are compared in a slash-tolerant manner
+        if path[-1] != '/':
             path += '/'
-        
-        # Normalize excluded_paths for consistent comparison
-        normalized_excluded_paths = [p if p.endswith('/') else p + '/' for p in excluded_paths]
 
-        return path not in normalized_excluded_paths
+        for excluded_path in excluded_paths:
+            if excluded_path[-1] != '/':
+                excluded_path += '/'
+            if path == excluded_path:
+                return False
+        return True
 
-    
+   
     def authorization_header(self, request=None) -> str:
         """
-        Retrieves the Authorization header from the request.
-
+        Retrieves the authorization header from the Flask request object.
+        
         Args:
             request (Request): The Flask request object.
 
         Returns:
-            str: The Authorization header value, or None if not present.
+            str: None for now, as authorization header retrieval is not yet implemented.
         """
-        if request is None:
-            return None
-        return request.headers.get("Authorization")
+        return None
 
     
-    def current_user(self, request=None) -> TypeVar('User'):
+    def current_user(self, request=None) -> User:
         """
-        Placeholder method for retrieving the current user.
-
+        Retrieves the current user based on the request.
+        
         Args:
             request (Request): The Flask request object.
 
         Returns:
-            TypeVar('User'): None (for now, as this will be implemented later).
+            User: None for now, as user retrieval is not yet implemented.
         """
         return None
