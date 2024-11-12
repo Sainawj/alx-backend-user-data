@@ -6,9 +6,11 @@ from flask import request
 # Define a TypeVar named User
 User = TypeVar('User')
 
+
 class Auth:
     """Template class for API authentication management."""
 
+    
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """
         Determines if authentication is required for a given path.
@@ -34,7 +36,7 @@ class Auth:
                 return False
         return True
 
-   
+    
     def authorization_header(self, request=None) -> str:
         """
         Retrieves the authorization header from the Flask request object.
@@ -43,9 +45,16 @@ class Auth:
             request (Request): The Flask request object.
 
         Returns:
-            str: None for now, as authorization header retrieval is not yet implemented.
+            str: The value of the Authorization header, or None if it's missing.
         """
-        return None
+        if request is None:
+            return None
+        
+        # Check if the 'Authorization' header exists
+        if 'Authorization' not in request.headers:
+            return None
+        
+        return request.headers['Authorization']
 
     
     def current_user(self, request=None) -> User:
@@ -58,4 +67,5 @@ class Auth:
         Returns:
             User: None for now, as user retrieval is not yet implemented.
         """
+        # For now, we assume there's no current user, to be expanded later
         return None
