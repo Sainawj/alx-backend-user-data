@@ -7,7 +7,7 @@ from api.v1.views import app_views
 from flask import Flask, jsonify, abort, request
 from flask_cors import CORS
 from api.v1.auth.auth import Auth  # Import the Auth class
-
+from api.v1.auth.basic_auth import BasicAuth  # Import the BasicAuth class
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
@@ -19,7 +19,11 @@ auth = None
 # Get the authentication type from environment variable
 auth_type = getenv("AUTH_TYPE")
 
-if auth_type == "auth":
+if auth_type == "basic_auth":
+    # Use BasicAuth if AUTH_TYPE is 'basic_auth'
+    auth = BasicAuth()
+else:
+    # Default to Auth if no special authentication type is set
     auth = Auth()
 
 
