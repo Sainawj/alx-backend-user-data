@@ -7,6 +7,7 @@ from api.v1.views import app_views
 from flask import Flask, jsonify, abort, request
 from flask_cors import CORS
 
+
 app = Flask(__name__)
 app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
@@ -26,6 +27,14 @@ def unauthorized(error) -> str:
     Returns JSON error response for 401 status code.
     """
     return jsonify({"error": "Unauthorized"}), 401
+
+
+@app.errorhandler(403)
+def forbidden(error) -> str:
+    """Forbidden handler.
+    Returns JSON error response for 403 status code.
+    """
+    return jsonify({"error": "Forbidden"}), 403
 
 if __name__ == "__main__":
     # Get host and port from environment, defaulting to "0.0.0.0" and "5000"
