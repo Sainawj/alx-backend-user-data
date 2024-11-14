@@ -2,6 +2,7 @@
 """Module to manage API authentication."""
 from typing import List, TypeVar
 from flask import request
+import os
 
 # Define a TypeVar named User
 User = TypeVar('User')
@@ -75,3 +76,23 @@ class Auth:
         """
         # For now, we assume there's no current user, to be expanded later
         return None
+
+    def session_cookie(self, request=None):
+        """
+        Retrieves the session cookie value from the request.
+
+        Args:
+            request (Request): The Flask request object.
+
+        Returns:
+            str: The value of the cookie named _my_session_id,
+                 or None if it's not found.
+        """
+        if request is None:
+            return None
+
+        # Get the cookie name from the environment variable SESSION_NAME
+        session_name = os.getenv("SESSION_NAME", "_my_session_id")
+
+        # Return the value of the session cookie using .get() to avoid KeyError
+        return request.cookies.get(session_name)
