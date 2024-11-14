@@ -1,6 +1,11 @@
-# api/v1/auth/session_auth.py
+#!/usr/bin/env python3
+"""Session authentication module for the API.
+"""
+from uuid import uuid4
+from flask import request
 
-from api.v1.auth.auth import Auth
+from .auth import Auth
+from models.user import User
 
 class SessionAuth(Auth):
     """SessionAuth class for session-based authentication.
