@@ -8,34 +8,26 @@ from flask import Flask, jsonify, abort, request
 from flask_cors import CORS
 from api.v1.auth.auth import Auth
 from api.v1.auth.basic_auth import BasicAuth
-
-# Attempt to import SessionAuth and SessionExpAuth
-try:
-    from api.v1.auth.session_auth import SessionAuth
-except ImportError:
-    SessionAuth = None
-
-try:
-    from api.v1.auth.session_exp_auth import SessionExpAuth
-except ImportError:
-    SessionExpAuth = None
+from api.v1.auth.session_auth import SessionAuth
+from api.v1.auth.session_exp_auth import SessionExpAuth
+from api.v1.auth.session_db_auth import SessionDBAuth  # Import the new auth system
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
-# Initialize auth to None
+# Determine the type of authentication based on environment variable
 auth = None
-
-# Get the authentication type from environment variable
 auth_type = getenv("AUTH_TYPE")
 
 if auth_type == "basic_auth":
     auth = BasicAuth()
-elif auth_type == "session_auth" and SessionAuth is not None:
+elif auth_type == "session_auth":
     auth = SessionAuth()
-elif auth_type == "session_exp_auth" and SessionExpAuth is not None:
+elif auth_type == "session_exp_auth":
     auth = SessionExpAuth()
+elif auth_type == "session_db_auth":
+    auth = SessionDBAuth()  # Use the new SessionDBAuth if set
 else:
     auth = Auth()
 
@@ -49,7 +41,6 @@ def before_request():
     if auth is None:
         return None
 
-    # List of routes that do not require authentication
     excluded_paths = [
         '/api/v1/status/',
         '/api/v1/unauthorized/',
