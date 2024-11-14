@@ -1,41 +1,46 @@
 #!/usr/bin/env python3
-"""Session Authentication Views for the API."""
+"""Session authentication module for the API.
+"""
+from uuid import uuid4
+from flask import request
 
-from flask import jsonify, request, make_response
-from api.v1.views import app_views
+from .auth import Auth
 from models.user import User
-from api.v1.app import auth
 
 
-@app_views.route('/auth_session/login', methods=['POST'], strict_slashes=False)
-def login():
-    """Handles POST request for /auth_session/login."""
-    email = request.form.get("email")
-    password = request.form.get("password")
+class SessionAuth(Auth):
+    """Session authentication class.
+    """
+    user_id_by_session_id = {}
 
-    # Check if email or password is missing
-    if not email:
-        return jsonify({"error": "email missing"}), 400
-    if not password:
-        return jsonify({"error": "password missing"}), 400
+    def create_session(self, user_id: str = None) -> str:
+        """Creates a session id for the user.
+        """
+        if type(user_id) is str:
+            session_id = str(uuid4())
+            self.user_id_by_session_id[session_id] = user_id
+            return session_id
 
-    # Find the user based on the provided email
-    user = User.search({"email": email})
-    if not user:
-        return jsonify({"error": "no user found for this email"}), 404
+    def user_id_for_session_id(self, session_id: str = None) -> str:
+        """Retrieves the user id of the user associated with
+        a given session id.
+        """
+        if type(session_id) is str:
+            return self.user_id_by_session_id.get(session_id)
 
-    # Check if the provided password is valid
-    if not user[0].is_valid_password(password):
-        return jsonify({"error": "wrong password"}), 401
+    def current_user(self, request=None) -> User:
+        """Retrieves the user associated with the request.
+        """
+        user_id = self.user_id_for_session_id(self.session_cookie(request))
+        return User.get(user_id)
 
-    # Create a session ID for the user
-    session_id = auth.create_session(user[0].id)
-
-    # Get user JSON representation and send it back
-    user_json = user[0].to_json()
-
-    # Set the session cookie
-    response = make_response(jsonify(user_json))
-    response.set_cookie(auth.SESSION_NAME, session_id)
-
-    return response
+    def destroy_session(self, request=None):
+        """Destroys an authenticated session.
+        """
+        session_id = self.session_cookie(request)
+        user_id = self.user_id_for_session_id(session_id)
+        if (request is None or session_id is None) or user_id is None:
+            return False
+        if session_id in self.user_id_by_session_id:
+            del self.user_id_by_session_id[session_id]
+        return True
