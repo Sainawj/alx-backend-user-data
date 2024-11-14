@@ -8,26 +8,35 @@ from flask import Flask, jsonify, abort, request
 from flask_cors import CORS
 from api.v1.auth.auth import Auth
 from api.v1.auth.basic_auth import BasicAuth
-from api.v1.auth.session_auth import SessionAuth
-from api.v1.auth.session_exp_auth import SessionExpAuth
-from api.v1.auth.session_db_auth import SessionDBAuth  # Import the new auth system
+
+# Attempt to import SessionAuth and SessionExpAuth
+try:
+    from api.v1.auth.session_auth import SessionAuth
+except ImportError:
+    SessionAuth = None
+
+try:
+    from api.v1.auth.session_exp_auth import SessionExpAuth
+except ImportError:
+    SessionExpAuth = None
 
 app = Flask(__name__)
 app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
-# Determine the type of authentication based on environment variable
+# Initialize auth to None
 auth = None
+
+# Get the authentication type from environment variable
 auth_type = getenv("AUTH_TYPE")
 
+# Determine which authentication type to use
 if auth_type == "basic_auth":
     auth = BasicAuth()
-elif auth_type == "session_auth":
+elif auth_type == "session_auth" and SessionAuth is not None:
     auth = SessionAuth()
-elif auth_type == "session_exp_auth":
+elif auth_type == "session_exp_auth" and SessionExpAuth is not None:
     auth = SessionExpAuth()
-elif auth_type == "session_db_auth":
-    auth = SessionDBAuth()  # Use the new SessionDBAuth if set
 else:
     auth = Auth()
 
@@ -41,24 +50,26 @@ def before_request():
     if auth is None:
         return None
 
-    # Excluded paths from authentication requirement
+    # List of routes that do not require authentication
     excluded_paths = [
         '/api/v1/status/',
         '/api/v1/unauthorized/',
         '/api/v1/forbidden/',
-        '/api/v1/auth_session/login/'  # Allow access to login route without auth
+        '/api/v1/auth_session/login/'
     ]
 
-    # Check if authentication is required for this path
+    # Check if the path requires authentication
     if auth.require_auth(request.path, excluded_paths):
-        # Check if either header or session cookie is present
+        # Check for authorization header or session cookie
         if auth.authorization_header(request) is None and auth.session_cookie(request) is None:
-            abort(401)
+            abort(401)  # Unauthorized error
 
-        # Set the current user if available, otherwise, restrict access
+        # Set the current_user attribute
         request.current_user = auth.current_user(request)
+
+        # If no current user, abort with Forbidden error
         if request.current_user is None:
-            abort(403)
+            abort(403)  # Forbidden error
 
 
 @app.errorhandler(404)
@@ -80,6 +91,7 @@ def forbidden(error) -> str:
 
 
 if __name__ == "__main__":
+    # Get host and port from environment, defaulting to "0.0.0.0" and "5000"
     host = getenv("API_HOST", "0.0.0.0")
-    port = getenv("API_PORT", "5000")
-    app.run(host=host, port=int(port))
+    port = int(getenv("API_PORT", "5000"))
+    app.run(host=host, port=port)
