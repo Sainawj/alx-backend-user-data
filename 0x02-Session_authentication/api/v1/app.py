@@ -9,6 +9,12 @@ from flask_cors import CORS
 from api.v1.auth.auth import Auth  # Import the Auth class
 from api.v1.auth.basic_auth import BasicAuth  # Import the BasicAuth class
 
+# Attempt to import SessionAuth
+try:
+    from api.v1.auth.session_auth import SessionAuth
+except ImportError:
+    SessionAuth = None
+
 app = Flask(__name__)
 app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
@@ -22,6 +28,9 @@ auth_type = getenv("AUTH_TYPE")
 if auth_type == "basic_auth":
     # Use BasicAuth if AUTH_TYPE is 'basic_auth'
     auth = BasicAuth()
+elif auth_type == "session_auth" and SessionAuth is not None:
+    # Use SessionAuth if AUTH_TYPE is 'session_auth'
+    auth = SessionAuth()
 else:
     # Default to Auth if no special authentication type is set
     auth = Auth()
