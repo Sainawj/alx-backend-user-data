@@ -74,7 +74,7 @@ def log_out(session_id: str) -> None:
     """Tests logging out of a session."""
     url = "{}/sessions".format(BASE_URL)  # Endpoint for logout
     req_cookies = {'session_id': session_id}
- 
+
     # Test session termination
     res = requests.delete(url, cookies=req_cookies)
     assert res.status_code == 200
