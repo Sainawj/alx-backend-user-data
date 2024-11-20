@@ -40,7 +40,7 @@ def log_in(email: str, password: str) -> str:
     """Tests logging in."""
     url = "{}/sessions".format(BASE_URL)  # Endpoint for login
     body = {'email': email, 'password': password}
- 
+
     # Test successful login
     res = requests.post(url, data=body)
     assert res.status_code == 200
@@ -53,7 +53,7 @@ def log_in(email: str, password: str) -> str:
 def profile_unlogged() -> None:
     """Tests retrieving profile information whilst logged out."""
     url = "{}/profile".format(BASE_URL)  # Endpoint for profile access
-  
+
     # Test profile access without being logged in
     res = requests.get(url)
     assert res.status_code == 403  # Forbidden
@@ -74,7 +74,7 @@ def log_out(session_id: str) -> None:
     """Tests logging out of a session."""
     url = "{}/sessions".format(BASE_URL)  # Endpoint for logout
     req_cookies = {'session_id': session_id}
-  
+ 
     # Test session termination
     res = requests.delete(url, cookies=req_cookies)
     assert res.status_code == 200
@@ -85,21 +85,21 @@ def reset_password_token(email: str) -> str:
     """Tests requesting a password reset."""
     url = "{}/reset_password".format(BASE_URL)
     body = {'email': email}
- 
+
     # Test successful reset token generation
     res = requests.post(url, data=body)
     assert res.status_code == 200
     assert "email" in res.json()
     assert res.json()["email"] == email
     assert "reset_token" in res.json()
- 
+
     # Return reset token for further actions
     return res.json().get('reset_token')
 
 
 def update_password(
     email: str, reset_token: str, new_password: str
-    ) -> None:
+) -> None:
     """Tests updating a user's password."""
     url = "{}/reset_password".format(BASE_URL)  # Endpoint
     body = {
