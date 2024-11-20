@@ -17,7 +17,7 @@ class DB:
 
     def __init__(self) -> None:
         """Initialize a new DB instance.
-  
+
         Sets up the database engine and initializes the schema.
         """
         self._engine = create_engine("sqlite:///a.db", echo=False)
@@ -39,7 +39,7 @@ class DB:
 
     def add_user(self, email: str, hashed_password: str) -> User:
         """Adds a new user to the database.
- 
+
         Args:
             email (str): The email address of the user.
             hashed_password (str): The hashed password of the user.
