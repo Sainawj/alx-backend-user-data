@@ -124,4 +124,4 @@ if __name__ == "__main__":
     log_out(session_id)                           # Log out
     reset_token = reset_password_token(EMAIL)     # req. password reset token
     update_password(EMAIL, reset_token, NEW_PASSWD)  # Update the password
-    log_in(EMAIL, NEW_PASSWD)                     # Log in with the new password
+    log_in(EMAIL, NEW_PASSWD)                     # new password login att.
